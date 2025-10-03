@@ -10,42 +10,54 @@ public class Cevir : MonoBehaviour
     [SerializeField] private TextMeshProUGUI uiSpinButtonText;
 
     [Header("2x Durumu için Text")]
-    [SerializeField] private TextMeshProUGUI doubleRewardText; // Buraya inspector’dan bağlayacağız
+    [SerializeField] private TextMeshProUGUI doubleRewardText;
+
+    [Header("Skip Animation Butonu")]
+    [SerializeField] private Button skipButton; // Inspector’dan bağla
+
     private void Start()
     {
-         // Başlangıçta 2x durumunu göster
         UpdateDoubleRewardText();
 
-        // Spin butonuna basıldığında
         uiSpinButton.onClick.AddListener(() =>
         {
-            uiSpinButton.interactable = false;   // butonu devre dışı bırak
+            uiSpinButton.interactable = false;
             uiSpinButtonText.text = "Dönüyor";
 
-            // Spin start event
+            // Skip butonu görünür olsun
+            skipButton.gameObject.SetActive(true);
+
             cark.OnSpinStart(() => Debug.Log("Döndürülüyor"));
 
-            // Spin end event
             cark.OnSpinEnd(carkParca =>
             {
                 Debug.Log("Döndürüldü, Kazanılan: " + carkParca.Label + ", Miktar: " + carkParca.Amount);
 
-                uiSpinButton.interactable = true;   // butonu tekrar aktif et
+                uiSpinButton.interactable = true;
                 uiSpinButtonText.text = "Döndür";
+
+                // Spin bitince skip butonu gizle
+                skipButton.gameObject.SetActive(false);
             });
 
-            // Çarkı döndür
             cark.Spin();
         });
+
+        // Skip butonuna basınca çark hızlansın
+        skipButton.onClick.AddListener(() => {
+            cark.SkipSpin();
+            skipButton.gameObject.SetActive(false);
+        });
+
+        // Başlangıçta gizli olsun
+        skipButton.gameObject.SetActive(false);
     }
 
     private void Update()
     {
-        // 2x durumu değişirse text otomatik güncellensin
         UpdateDoubleRewardText();
     }
 
-    // 2x durumuna göre Text güncelle
     private void UpdateDoubleRewardText()
     {
         if (doubleRewardText != null)
